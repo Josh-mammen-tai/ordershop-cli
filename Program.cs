@@ -29,7 +29,14 @@ builder.Services.AddScoped<CustomerService>();
 
 builder.Services.AddControllers();
 
+// OpenAPI / Swagger — documents the REST API surface.
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 WebApplication app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapControllers();
 app.Run();

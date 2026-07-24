@@ -3,6 +3,18 @@
 A single source of truth for the OrderShop backend: what it is, how it's layered, the
 relational data model, and every business flow it exposes.
 
+## Repository profile
+
+| | |
+|---|---|
+| **Type** | **Web service** — an HTTP / REST API backend. A business-process service, **not** a library, SDK, CLI, or desktop UI. |
+| **Primary framework** | **ASP.NET Core** (`Microsoft.NET.Sdk.Web`, attribute-routed controllers, OpenAPI / Swagger) |
+| **Language / runtime** | C# on .NET 8 |
+| **Persistence** | Entity Framework Core 8 (SQLite) — relational schema with foreign keys |
+| **API surface** | 12 REST endpoints across 5 controllers |
+| **Business flows** | 8 — checkout, register customer, ship, deliver, cancel, refund, submit review, restock |
+| **Domain entities** | 9, related by foreign keys + navigation properties |
+
 ## 1. Overview
 
 OrderShop is an **ASP.NET Core (.NET 8) Web API** backend for a small online shop. It uses

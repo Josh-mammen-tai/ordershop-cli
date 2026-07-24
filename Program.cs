@@ -13,6 +13,7 @@ builder.Services.AddDbContext<ShopDbContext>(options =>
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 // Business-flow services.
 builder.Services.AddScoped<PricingService>();
@@ -22,6 +23,9 @@ builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<CheckoutService>();
 builder.Services.AddScoped<FulfillmentService>();
 builder.Services.AddScoped<RefundService>();
+builder.Services.AddScoped<OrderCancellationService>();
+builder.Services.AddScoped<ReviewService>();
+builder.Services.AddScoped<CustomerService>();
 
 builder.Services.AddControllers();
 

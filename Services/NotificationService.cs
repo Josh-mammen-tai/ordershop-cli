@@ -1,14 +1,25 @@
 using System;
-using OrderShop.Models;
+using OrderShop.Domain.Entities;
 
 namespace OrderShop.Services;
 
-/// <summary>Sends order confirmations to the customer (console-backed).</summary>
+/// <summary>Sends customer notifications for the order lifecycle (console-backed).</summary>
 public sealed class NotificationService
 {
-    /// <summary>Notify the customer that their order was confirmed.</summary>
-    public void SendOrderConfirmation(Customer customer, string paymentReference)
+    public void OrderConfirmed(Customer customer, Order order)
     {
-        Console.WriteLine($"[notify] {customer.Email}: your order is confirmed ({paymentReference}).");
+        Console.WriteLine($"[notify] {customer.Email}: order #{order.Id} confirmed.");
+    }
+
+    public void OrderShipped(Customer customer, Shipment shipment)
+    {
+        Console.WriteLine(
+            $"[notify] {customer.Email}: order #{shipment.OrderId} shipped via " +
+            $"{shipment.Carrier} ({shipment.TrackingNumber}).");
+    }
+
+    public void OrderRefunded(Customer customer, Order order)
+    {
+        Console.WriteLine($"[notify] {customer.Email}: order #{order.Id} refunded.");
     }
 }

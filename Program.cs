@@ -1,36 +1,31 @@
-using System;
-using OrderShop.Models;
-using OrderShop.Repositories;
+using Microsoft.EntityFrameworkCore;
+using OrderShop.Data;
+using OrderShop.Data.Repositories;
 using OrderShop.Services;
 
-namespace OrderShop;
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-/// <summary>Console entry point — runs the checkout flow for a sample order.</summary>
-public static class Program
-{
-    public static void Main()
-    {
-        Customer customer = new(1, "Ada Lovelace", "ada@example.com");
+// EF Core context (SQLite for the demo).
+builder.Services.AddDbContext<ShopDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("Shop") ?? "Data Source=shop.db"));
 
-        Order order = new(customer);
-        order.AddItem(new OrderItem("SKU-1", "USB-C Cable", 8.50m, 2));
-        order.AddItem(new OrderItem("SKU-2", "Wireless Mouse", 21.00m, 1));
+// Data layer — repositories.
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
-        // Build the collaborators for the checkout flow.
-        InventoryService inventory = new();
-        PricingService pricing = new();
-        PaymentService payment = new();
-        NotificationService notifications = new();
-        OrderRepository orders = new();
+// Business-flow services.
+builder.Services.AddScoped<PricingService>();
+builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<InventoryService>();
+builder.Services.AddScoped<CheckoutService>();
+builder.Services.AddScoped<FulfillmentService>();
+builder.Services.AddScoped<RefundService>();
 
-        OrderService orderService = new(inventory, pricing);
-        CheckoutService checkout = new(orderService, payment, notifications, orders);
+builder.Services.AddControllers();
 
-        CheckoutResult result = checkout.Checkout(order, PaymentMethod.Card);
+WebApplication app = builder.Build();
 
-        Console.WriteLine($"Customer : {customer.Name} <{customer.Email}>");
-        Console.WriteLine($"Items    : {order.Items.Count}");
-        Console.WriteLine($"Status   : {result.Message}");
-        Console.WriteLine($"Stored   : {orders.Count} order(s)");
-    }
-}
+app.MapControllers();
+app.Run();

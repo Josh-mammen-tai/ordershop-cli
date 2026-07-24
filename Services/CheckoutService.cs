@@ -1,57 +1,68 @@
-using OrderShop.Models;
-using OrderShop.Repositories;
+using System;
+using OrderShop.Data.Repositories;
+using OrderShop.Domain;
+using OrderShop.Domain.Entities;
 
 namespace OrderShop.Services;
 
 /// <summary>
-/// The end-to-end checkout business flow. Ties the whole app together:
-///   1. validate stock and price the order  (OrderService)
-///   2. take payment for the total          (PaymentService)
-///   3. persist the order                    (OrderRepository)
-///   4. notify the customer                  (NotificationService)
+/// Checkout business flow. End-to-end:
+/// <list type="number">
+///   <item>validate stock (<see cref="InventoryService"/>)</item>
+///   <item>price the order (<see cref="PricingService"/>)</item>
+///   <item>charge payment (<see cref="PaymentService"/>)</item>
+///   <item>reserve stock, persist the order (<see cref="IOrderRepository"/>)</item>
+///   <item>notify the customer (<see cref="NotificationService"/>)</item>
+/// </list>
 /// </summary>
 public sealed class CheckoutService
 {
-    private readonly OrderService _orderService;
-    private readonly PaymentService _paymentService;
-    private readonly NotificationService _notificationService;
-    private readonly OrderRepository _orderRepository;
+    private readonly IOrderRepository _orders;
+    private readonly InventoryService _inventory;
+    private readonly PricingService _pricing;
+    private readonly PaymentService _payments;
+    private readonly NotificationService _notifications;
 
     public CheckoutService(
-        OrderService orderService,
-        PaymentService paymentService,
-        NotificationService notificationService,
-        OrderRepository orderRepository)
+        IOrderRepository orders,
+        InventoryService inventory,
+        PricingService pricing,
+        PaymentService payments,
+        NotificationService notifications)
     {
-        _orderService = orderService;
-        _paymentService = paymentService;
-        _notificationService = notificationService;
-        _orderRepository = orderRepository;
+        _orders = orders;
+        _inventory = inventory;
+        _pricing = pricing;
+        _payments = payments;
+        _notifications = notifications;
     }
 
-    /// <summary>Run the full checkout flow for an order and a chosen payment method.</summary>
+    /// <summary>Run the checkout flow for a built order and chosen payment method.</summary>
     public CheckoutResult Checkout(Order order, PaymentMethod method)
     {
-        // 1. Validate stock and price the order.
-        OrderResult placed = _orderService.PlaceOrder(order);
-        if (!placed.Success)
+        if (!_inventory.IsAvailable(order))
         {
-            return new CheckoutResult(false, placed.Message);
+            return new CheckoutResult(false, "One or more items are out of stock.");
         }
 
-        // 2. Take payment for the priced total.
-        Payment payment = new(placed.Total, method);
-        PaymentResult paid = _paymentService.Charge(payment);
-        if (!paid.Approved)
+        decimal total = _pricing.Total(order.Items);
+        Payment payment = _payments.Charge(order, total, method);
+        if (payment.Status != PaymentStatus.Approved)
         {
-            return new CheckoutResult(false, paid.Message);
+            return new CheckoutResult(false, "Payment was declined.");
         }
 
-        // 3. Persist the order and notify the customer.
-        _orderRepository.Save(order);
-        _notificationService.SendOrderConfirmation(order.Customer, paid.Reference);
+        _inventory.Reserve(order);
 
-        return new CheckoutResult(true, $"Checkout complete. {paid.Reference}");
+        order.Payment = payment;
+        order.Status = OrderStatus.Paid;
+        order.CreatedAt = DateTime.UtcNow;
+
+        _orders.Add(order);
+        _orders.Save();
+
+        _notifications.OrderConfirmed(order.Customer, order);
+        return new CheckoutResult(true, payment.Reference);
     }
 }
 

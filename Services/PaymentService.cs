@@ -1,26 +1,34 @@
-using OrderShop.Models;
+using System;
+using OrderShop.Domain;
+using OrderShop.Domain.Entities;
 
 namespace OrderShop.Services;
 
-/// <summary>Charges payments for an order total (a simulated payment gateway).</summary>
+/// <summary>Charges and refunds payments through a simulated payment gateway.</summary>
 public sealed class PaymentService
 {
     private const decimal MaxCardAmount = 5000m;
 
-    /// <summary>Attempt to charge <paramref name="payment"/> and return an approval result.</summary>
-    public PaymentResult Charge(Payment payment)
+    /// <summary>Charge <paramref name="amount"/> to the order and return the resulting payment.</summary>
+    public Payment Charge(Order order, decimal amount, PaymentMethod method)
     {
-        if (payment.Amount <= 0m)
-        {
-            return new PaymentResult(false, string.Empty, "Amount must be positive.");
-        }
+        bool approved = amount > 0m && !(method == PaymentMethod.Card && amount > MaxCardAmount);
 
-        if (payment.Method == PaymentMethod.Card && payment.Amount > MaxCardAmount)
+        return new Payment
         {
-            return new PaymentResult(false, string.Empty, "Card limit exceeded.");
-        }
+            OrderId = order.Id,
+            Amount = amount,
+            Method = method,
+            Status = approved ? PaymentStatus.Approved : PaymentStatus.Declined,
+            Reference = approved ? $"PAY-{method}-{amount:0.00}" : string.Empty,
+            ProcessedAt = DateTime.UtcNow,
+        };
+    }
 
-        string reference = $"PAY-{payment.Method}-{payment.Amount:0.00}";
-        return new PaymentResult(true, reference, "Payment approved.");
+    /// <summary>Mark a previously approved payment as refunded.</summary>
+    public void Refund(Payment payment)
+    {
+        payment.Status = PaymentStatus.Refunded;
+        payment.ProcessedAt = DateTime.UtcNow;
     }
 }

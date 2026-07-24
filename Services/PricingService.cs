@@ -1,15 +1,18 @@
-using OrderShop.Models;
+using System.Collections.Generic;
+using OrderShop.Domain.Entities;
 
 namespace OrderShop.Services;
 
-/// <summary>Calculates the monetary totals for an order.</summary>
+/// <summary>Prices an order's line items into a subtotal, tax, and grand total.</summary>
 public sealed class PricingService
 {
-    /// <summary>Sum of every line total in the order, before any adjustments.</summary>
-    public decimal Subtotal(Order order)
+    private const decimal TaxRate = 0.08m;
+
+    /// <summary>Sum of every line total, before tax.</summary>
+    public decimal Subtotal(IEnumerable<OrderItem> items)
     {
         decimal sum = 0m;
-        foreach (OrderItem item in order.Items)
+        foreach (OrderItem item in items)
         {
             sum += item.LineTotal;
         }
@@ -17,9 +20,16 @@ public sealed class PricingService
         return sum;
     }
 
-    /// <summary>The amount the customer pays for the order.</summary>
-    public decimal CalculateTotal(Order order)
+    /// <summary>Tax charged on a subtotal.</summary>
+    public decimal Tax(decimal subtotal)
     {
-        return Subtotal(order);
+        return subtotal * TaxRate;
+    }
+
+    /// <summary>The amount the customer pays: subtotal plus tax.</summary>
+    public decimal Total(IEnumerable<OrderItem> items)
+    {
+        decimal subtotal = Subtotal(items);
+        return subtotal + Tax(subtotal);
     }
 }

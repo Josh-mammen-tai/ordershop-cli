@@ -30,6 +30,8 @@ public class ShopDbContext : DbContext
 
     public DbSet<Shipment> Shipments => Set<Shipment>();
 
+    public DbSet<Review> Reviews => Set<Review>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Customer 1 → * Order (restrict delete so orders are never orphaned).
@@ -82,6 +84,20 @@ public class ShopDbContext : DbContext
             .HasOne(o => o.ShippingAddress)
             .WithMany()
             .HasForeignKey(o => o.ShippingAddressId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Product 1 → * Review (deleting a product cascades to its reviews).
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Product)
+            .WithMany()
+            .HasForeignKey(r => r.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Customer 1 → * Review (restrict so reviews are never orphaned).
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Customer)
+            .WithMany()
+            .HasForeignKey(r => r.CustomerId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // A product's SKU is unique.

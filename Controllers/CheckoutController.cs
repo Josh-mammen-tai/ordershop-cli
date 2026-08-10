@@ -22,7 +22,7 @@ public sealed class CheckoutController : ControllerBase
 
     /// <summary>Check out an order for a customer using the given payment method.</summary>
     [HttpPost("{customerId:int}")]
-    public IActionResult Checkout(int customerId, [FromBody] Order order, [FromQuery] PaymentMethod method)
+    public IActionResult Checkout(int customerId, [FromBody] Order order, [FromQuery] PaymentMethod method, [FromQuery] string? discountCode = null)
     {
         Customer? customer = _customers.GetWithOrders(customerId);
         if (customer is null)
@@ -33,7 +33,7 @@ public sealed class CheckoutController : ControllerBase
         order.Customer = customer;
         order.CustomerId = customer.Id;
 
-        CheckoutResult result = _checkout.Checkout(order, method);
+        CheckoutResult result = _checkout.Checkout(order, method, discountCode);
         return result.Success
             ? Ok(new { reference = result.Message })
             : BadRequest(result.Message);

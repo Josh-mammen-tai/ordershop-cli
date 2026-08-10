@@ -22,23 +22,26 @@ public sealed class CheckoutService
     private readonly PricingService _pricing;
     private readonly PaymentService _payments;
     private readonly NotificationService _notifications;
+    private readonly DiscountService _discountService;
 
     public CheckoutService(
         IOrderRepository orders,
         InventoryService inventory,
         PricingService pricing,
         PaymentService payments,
-        NotificationService notifications)
+        NotificationService notifications,
+        DiscountService discountService)
     {
         _orders = orders;
         _inventory = inventory;
         _pricing = pricing;
         _payments = payments;
         _notifications = notifications;
+        _discountService = discountService;
     }
 
     /// <summary>Run the checkout flow for a built order and chosen payment method.</summary>
-    public CheckoutResult Checkout(Order order, PaymentMethod method)
+    public CheckoutResult Checkout(Order order, PaymentMethod method, string? discountCode = null)
     {
         if (!_inventory.IsAvailable(order))
         {
@@ -46,6 +49,13 @@ public sealed class CheckoutService
         }
 
         decimal total = _pricing.Total(order.Items);
+
+        if (!string.IsNullOrEmpty(discountCode) &&
+            _discountService.ValidateDiscountCode(discountCode, out DiscountCode? discount))
+        {
+            total = _discountService.ApplyDiscount(total, discount);
+        }
+
         Payment payment = _payments.Charge(order, total, method);
         if (payment.Status != PaymentStatus.Approved)
         {

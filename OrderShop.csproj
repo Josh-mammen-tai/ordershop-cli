@@ -19,4 +19,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- The xUnit test project lives under this directory; keep its sources out of
+         this web project's default **/*.cs compile glob (it has its own project). -->
+    <Compile Remove="OrderShop.Tests/**/*.cs" />
+  </ItemGroup>
+
 </Project>

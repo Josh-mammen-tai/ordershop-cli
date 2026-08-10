@@ -14,12 +14,14 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
 
 // Business-flow services.
 builder.Services.AddScoped<PricingService>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<InventoryService>();
+builder.Services.AddScoped<DiscountService>();
 builder.Services.AddScoped<CheckoutService>();
 builder.Services.AddScoped<FulfillmentService>();
 builder.Services.AddScoped<RefundService>();

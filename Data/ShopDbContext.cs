@@ -32,6 +32,8 @@ public class ShopDbContext : DbContext
 
     public DbSet<Review> Reviews => Set<Review>();
 
+    public DbSet<DiscountCode> DiscountCodes => Set<DiscountCode>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Customer 1 → * Order (restrict delete so orders are never orphaned).
@@ -104,5 +106,24 @@ public class ShopDbContext : DbContext
         modelBuilder.Entity<Product>()
             .HasIndex(p => p.Sku)
             .IsUnique();
+
+        modelBuilder.Entity<DiscountCode>()
+            .HasKey(dc => dc.Id);
+
+        modelBuilder.Entity<DiscountCode>()
+            .Property(dc => dc.Code)
+            .IsRequired();
+
+        modelBuilder.Entity<DiscountCode>()
+            .HasIndex(dc => dc.Code)
+            .IsUnique();
+
+        modelBuilder.Entity<DiscountCode>()
+            .Property(dc => dc.DiscountValue)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<DiscountCode>()
+            .Property(dc => dc.IsActive)
+            .HasDefaultValue(true);
     }
 }

@@ -25,7 +25,7 @@ public sealed class ReviewService
     /// <summary>Submit a review for a product and return the updated average rating.</summary>
     public ReviewResult Submit(int productId, int customerId, int rating, string comment)
     {
-        Product? product = _products.Get(productId);
+        Product? product = _products.GetById(productId);
         if (product is null)
         {
             return new ReviewResult(false, 0d, "Product not found.");

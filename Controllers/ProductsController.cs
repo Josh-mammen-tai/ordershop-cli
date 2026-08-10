@@ -23,7 +23,7 @@ public sealed class ProductsController : ControllerBase
     [HttpGet("{id:int}")]
     public IActionResult Get(int id)
     {
-        Product? product = _products.Get(id);
+        Product? product = _products.GetById(id);
         return product is null ? NotFound() : Ok(product);
     }
 

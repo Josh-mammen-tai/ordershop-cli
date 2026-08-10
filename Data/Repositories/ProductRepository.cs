@@ -8,7 +8,7 @@ namespace OrderShop.Data.Repositories;
 /// <summary>Data access for <see cref="Product"/> catalog and stock.</summary>
 public interface IProductRepository
 {
-    Product? Get(int id);
+    Product? GetById(int id);
 
     IReadOnlyList<Product> InCategory(int categoryId);
 
@@ -28,7 +28,7 @@ public sealed class ProductRepository : IProductRepository
         _db = db;
     }
 
-    public Product? Get(int id)
+    public Product? GetById(int id)
     {
         return _db.Products
             .Include(p => p.Category)

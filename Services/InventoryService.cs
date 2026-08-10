@@ -21,7 +21,7 @@ public sealed class InventoryService
     {
         foreach (OrderItem item in order.Items)
         {
-            Product? product = _products.Get(item.ProductId);
+            Product? product = _products.GetById(item.ProductId);
             if (product is null || product.StockQuantity < item.Quantity)
             {
                 return false;

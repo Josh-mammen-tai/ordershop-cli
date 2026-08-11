@@ -10,6 +10,8 @@ public interface ICustomerRepository
     /// <summary>Load a customer with their orders and addresses eagerly included.</summary>
     Customer? GetWithOrders(int id);
 
+    Customer? GetById(int id);
+
     void Add(Customer customer);
 
     void Save();
@@ -31,6 +33,11 @@ public sealed class CustomerRepository : ICustomerRepository
             .Include(c => c.Orders)
             .Include(c => c.Addresses)
             .FirstOrDefault(c => c.Id == id);
+    }
+
+    public Customer? GetById(int id)
+    {
+        return _db.Customers.FirstOrDefault(c => c.Id == id);
     }
 
     public void Add(Customer customer)

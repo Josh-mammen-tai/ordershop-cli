@@ -23,6 +23,7 @@ public sealed class CheckoutService
     private readonly PaymentService _payments;
     private readonly NotificationService _notifications;
     private readonly DiscountService _discountService;
+    private readonly LoyaltyService _loyaltyService;
 
     public CheckoutService(
         IOrderRepository orders,
@@ -30,7 +31,8 @@ public sealed class CheckoutService
         PricingService pricing,
         PaymentService payments,
         NotificationService notifications,
-        DiscountService discountService)
+        DiscountService discountService,
+        LoyaltyService loyaltyService)
     {
         _orders = orders;
         _inventory = inventory;
@@ -38,10 +40,11 @@ public sealed class CheckoutService
         _payments = payments;
         _notifications = notifications;
         _discountService = discountService;
+        _loyaltyService = loyaltyService;
     }
 
     /// <summary>Run the checkout flow for a built order and chosen payment method.</summary>
-    public CheckoutResult Checkout(Order order, PaymentMethod method, string? discountCode = null)
+    public CheckoutResult Checkout(Order order, PaymentMethod method, string? discountCode = null, int? loyaltyPoints = null)
     {
         if (!_inventory.IsAvailable(order))
         {
@@ -54,6 +57,14 @@ public sealed class CheckoutService
             _discountService.ValidateDiscountCode(discountCode, out DiscountCode? discount))
         {
             total = _discountService.ApplyDiscount(total, discount);
+        }
+
+        if (loyaltyPoints.HasValue && loyaltyPoints.Value > 0)
+        {
+            int points = loyaltyPoints.Value;
+            decimal pointsDiscount = points / 100m;
+            total -= pointsDiscount;
+            _loyaltyService.RedeemPoints(order.CustomerId, points);
         }
 
         Payment payment = _payments.Charge(order, total, method);

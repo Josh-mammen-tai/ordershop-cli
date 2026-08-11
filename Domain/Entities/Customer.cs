@@ -14,9 +14,14 @@ public class Customer
 
     public string Email { get; set; } = string.Empty;
 
+    public int LoyaltyPoints { get; set; }
+
     /// <summary>Orders placed by this customer (1 → *).</summary>
     public ICollection<Order> Orders { get; set; } = new List<Order>();
 
     /// <summary>Addresses belonging to this customer (1 → *).</summary>
     public ICollection<Address> Addresses { get; set; } = new List<Address>();
+
+    /// <summary>History of loyalty points earned and redeemed.</summary>
+    public ICollection<LoyaltyPointsHistory> LoyaltyPointsHistories { get; set; } = new List<LoyaltyPointsHistory>();
 }

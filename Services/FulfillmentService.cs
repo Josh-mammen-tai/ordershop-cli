@@ -13,11 +13,16 @@ public sealed class FulfillmentService
 {
     private readonly IOrderRepository _orders;
     private readonly NotificationService _notifications;
+    private readonly LoyaltyService _loyaltyService;
 
-    public FulfillmentService(IOrderRepository orders, NotificationService notifications)
+    public FulfillmentService(
+        IOrderRepository orders,
+        NotificationService notifications,
+        LoyaltyService loyaltyService)
     {
         _orders = orders;
         _notifications = notifications;
+        _loyaltyService = loyaltyService;
     }
 
     /// <summary>Ship a paid order with the given carrier. Returns null if not shippable.</summary>
@@ -58,5 +63,22 @@ public sealed class FulfillmentService
         order.Shipment.Status = ShipmentStatus.Delivered;
         order.Status = OrderStatus.Delivered;
         _orders.Save();
+
+        int points = CalculatePoints(order);
+        if (points > 0)
+        {
+            _loyaltyService.AccumulatePoints(order.CustomerId, points);
+        }
+    }
+
+    private static int CalculatePoints(Order order)
+    {
+        decimal total = 0m;
+        foreach (OrderItem item in order.Items)
+        {
+            total += item.LineTotal;
+        }
+
+        return (int)Math.Floor(total / 10m);
     }
 }

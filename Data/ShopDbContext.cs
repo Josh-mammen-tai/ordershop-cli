@@ -34,6 +34,8 @@ public class ShopDbContext : DbContext
 
     public DbSet<DiscountCode> DiscountCodes => Set<DiscountCode>();
 
+    public DbSet<LoyaltyPointsHistory> LoyaltyPointsHistories => Set<LoyaltyPointsHistory>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Customer 1 → * Order (restrict delete so orders are never orphaned).
@@ -125,5 +127,17 @@ public class ShopDbContext : DbContext
         modelBuilder.Entity<DiscountCode>()
             .Property(dc => dc.IsActive)
             .HasDefaultValue(true);
+
+        modelBuilder.Entity<Customer>()
+            .Property(c => c.LoyaltyPoints)
+            .HasDefaultValue(0);
+
+        modelBuilder.Entity<LoyaltyPointsHistory>()
+            .HasKey(lph => lph.Id);
+
+        modelBuilder.Entity<LoyaltyPointsHistory>()
+            .HasOne(lph => lph.Customer)
+            .WithMany(c => c.LoyaltyPointsHistories)
+            .HasForeignKey(lph => lph.CustomerId);
     }
 }

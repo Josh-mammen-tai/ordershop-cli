@@ -25,6 +25,24 @@ public sealed class PaymentService
         };
     }
 
+    /// <summary>
+    /// Settle an order that loyalty points already cover in full. No money changes hands,
+    /// so this records an approved zero-value payment rather than sending a zero-amount
+    /// charge to the gateway (which rejects non-positive amounts).
+    /// </summary>
+    public Payment SettleWithPoints(Order order, PaymentMethod method)
+    {
+        return new Payment
+        {
+            OrderId = order.Id,
+            Amount = 0m,
+            Method = method,
+            Status = PaymentStatus.Approved,
+            Reference = $"PAY-POINTS-{order.Id:D6}",
+            ProcessedAt = DateTime.UtcNow,
+        };
+    }
+
     /// <summary>Mark a previously approved payment as refunded.</summary>
     public void Refund(Payment payment)
     {

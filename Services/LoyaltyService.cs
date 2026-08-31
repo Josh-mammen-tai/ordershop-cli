@@ -19,10 +19,15 @@ public sealed class LoyaltyService
 
     public void AccumulatePoints(int customerId, int points)
     {
+        if (points < 0)
+        {
+            throw new ArgumentException("Points cannot be negative.", nameof(points));
+        }
+
         Customer? customer = _customerRepository.GetById(customerId);
         if (customer is null)
         {
-            return;
+            throw new InvalidOperationException("Customer not found.");
         }
 
         customer.LoyaltyPoints += points;
@@ -39,10 +44,20 @@ public sealed class LoyaltyService
 
     public void RedeemPoints(int customerId, int points)
     {
-        Customer? customer = _customerRepository.GetById(customerId);
-        if (customer is null || customer.LoyaltyPoints < points)
+        if (points < 0)
         {
-            return;
+            throw new ArgumentException("Points cannot be negative.", nameof(points));
+        }
+
+        Customer? customer = _customerRepository.GetById(customerId);
+        if (customer is null)
+        {
+            throw new InvalidOperationException("Customer not found.");
+        }
+
+        if (customer.LoyaltyPoints < points)
+        {
+            throw new InvalidOperationException("Insufficient points for redemption.");
         }
 
         customer.LoyaltyPoints -= points;

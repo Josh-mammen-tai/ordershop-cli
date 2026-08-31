@@ -93,10 +93,19 @@ Every flow is triggered by an HTTP endpoint and orchestrated by a single service
 `CheckoutController.Checkout` → `CheckoutService.Checkout`:
 1. `InventoryService.IsAvailable` — validate stock for every line.
 2. `PricingService.Total` — subtotal + tax.
-3. `PaymentService.Charge` — take payment for the total.
-4. `InventoryService.Reserve` — decrement stock.
-5. `OrderRepository.Add` / `Save` — persist the paid order.
-6. `NotificationService.OrderConfirmed` — notify the customer.
+3. `DiscountService.ValidateDiscountCode` / `ApplyDiscount` — apply `?discountCode`, if given.
+4. `LoyaltyService.GetPointsBalance` — price the `?loyaltyPoints` redemption, if given
+   (100 points = 1.00). The spend is *calculated* here but not yet committed: it is capped
+   at the remaining order total so surplus points are never burned, and a balance that is
+   too small fails the checkout before any money moves.
+5. `PaymentService.Charge` — take payment for what is left. When points cover the order
+   outright, `PaymentService.SettleWithPoints` records an approved zero-value payment
+   instead, since the gateway rejects non-positive amounts.
+6. `LoyaltyService.RedeemPoints` — **only after** the payment is approved, so a declined
+   payment never costs the customer their points.
+7. `InventoryService.Reserve` — decrement stock.
+8. `OrderRepository.Add` / `Save` — persist the paid order.
+9. `NotificationService.OrderConfirmed` — notify the customer.
 
 ### 5.2 Register customer
 `CustomersController.Register` → `CustomerService.Register`: create the customer with a default

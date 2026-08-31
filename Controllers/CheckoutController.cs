@@ -20,9 +20,17 @@ public sealed class CheckoutController : ControllerBase
         _customers = customers;
     }
 
-    /// <summary>Check out an order for a customer using the given payment method.</summary>
+    /// <summary>
+    /// Check out an order for a customer using the given payment method, optionally
+    /// applying a discount code and/or redeeming loyalty points against the total.
+    /// </summary>
     [HttpPost("{customerId:int}")]
-    public IActionResult Checkout(int customerId, [FromBody] Order order, [FromQuery] PaymentMethod method, [FromQuery] string? discountCode = null)
+    public IActionResult Checkout(
+        int customerId,
+        [FromBody] Order order,
+        [FromQuery] PaymentMethod method,
+        [FromQuery] string? discountCode = null,
+        [FromQuery] int? loyaltyPoints = null)
     {
         Customer? customer = _customers.GetWithOrders(customerId);
         if (customer is null)
@@ -33,7 +41,7 @@ public sealed class CheckoutController : ControllerBase
         order.Customer = customer;
         order.CustomerId = customer.Id;
 
-        CheckoutResult result = _checkout.Checkout(order, method, discountCode);
+        CheckoutResult result = _checkout.Checkout(order, method, discountCode, loyaltyPoints);
         return result.Success
             ? Ok(new { reference = result.Message })
             : BadRequest(result.Message);

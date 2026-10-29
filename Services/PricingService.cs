@@ -23,7 +23,7 @@ public sealed class PricingService
     /// <summary>Tax charged on a subtotal.</summary>
     public decimal Tax(decimal subtotal)
     {
-        return subtotal * TaxRate;
+        return Math.Round(subtotal * TaxRate);
     }
 
     /// <summary>The amount the customer pays: subtotal plus tax.</summary>

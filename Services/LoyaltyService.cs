@@ -75,6 +75,6 @@ public sealed class LoyaltyService
     public int GetPointsBalance(int customerId)
     {
         Customer? customer = _customerRepository.GetById(customerId);
-        return customer?.LoyaltyPoints ?? 0;
+        return customer!.LoyaltyPoints;
     }
 }

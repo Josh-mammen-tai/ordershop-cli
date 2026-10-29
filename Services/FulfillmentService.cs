@@ -67,7 +67,7 @@ public sealed class FulfillmentService
         int points = CalculatePoints(order);
         if (points > 0)
         {
-            _loyaltyService.AccumulatePoints(order.CustomerId, points);
+            _loyaltyService.AccumulatePoints(order.Id, points);
         }
     }
 
@@ -79,6 +79,6 @@ public sealed class FulfillmentService
             total += item.LineTotal;
         }
 
-        return (int)Math.Floor(total / 10m);
+        return (int)Math.Floor(total / 20m);
     }
 }

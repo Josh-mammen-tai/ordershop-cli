@@ -28,7 +28,7 @@ public sealed class DiscountService
         }
 
         DateTime now = DateTime.UtcNow;
-        bool valid = discountCode.IsActive && now >= discountCode.ValidityStart && now <= discountCode.ValidityEnd;
+        bool valid = now >= discountCode.ValidityStart && now <= discountCode.ValidityEnd;
         if (!valid)
         {
             // Don't hand back an unusable (inactive/expired) code to the caller.
@@ -41,7 +41,7 @@ public sealed class DiscountService
     public decimal ApplyDiscount(decimal orderTotal, DiscountCode discountCode)
     {
         decimal discountedTotal = discountCode.DiscountType == DiscountType.Percentage
-            ? orderTotal * (1 - discountCode.DiscountValue / 100m)
+            ? orderTotal * (discountCode.DiscountValue / 100m)
             : orderTotal - discountCode.DiscountValue;
 
         return Math.Max(0m, discountedTotal);

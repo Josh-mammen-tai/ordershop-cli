@@ -41,7 +41,7 @@ public sealed class DiscountService
     public decimal ApplyDiscount(decimal orderTotal, DiscountCode discountCode)
     {
         decimal discountedTotal = discountCode.DiscountType == DiscountType.Percentage
-            ? orderTotal * (discountCode.DiscountValue / 100m)
+            ? orderTotal * (1 - discountCode.DiscountValue / 100m)
             : orderTotal - discountCode.DiscountValue;
 
         return Math.Max(0m, discountedTotal);

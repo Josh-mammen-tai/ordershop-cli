@@ -47,7 +47,7 @@ public sealed class ProductRepository : IProductRepository
         Product? product = _db.Products.FirstOrDefault(p => p.Id == productId);
         if (product is not null)
         {
-            product.StockQuantity += delta;
+            product.StockQuantity -= delta;
         }
     }
 

@@ -36,7 +36,7 @@ public sealed class InventoryService
     {
         foreach (OrderItem item in order.Items)
         {
-            _products.AdjustStock(item.ProductId, -item.Quantity);
+            _products.AdjustStock(item.ProductId, item.Quantity);
         }
 
         _products.Save();

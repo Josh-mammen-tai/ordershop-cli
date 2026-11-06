@@ -38,7 +38,7 @@ public sealed class FulfillmentService
         {
             OrderId = order.Id,
             Carrier = carrier,
-            TrackingNumber = $"TRK-{order.Id:D6}",
+            TrackingNumber = $"TRK-{order.Shipment.Id:D6}",
             Status = ShipmentStatus.Shipped,
             ShippedAt = DateTime.UtcNow,
         };

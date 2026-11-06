@@ -40,7 +40,7 @@ public sealed class RefundService
 
         foreach (OrderItem item in order.Items)
         {
-            _inventory.Restock(item.ProductId, item.Quantity);
+            _inventory.Restock(item.ProductId, 1);
         }
 
         order.Status = OrderStatus.Refunded;

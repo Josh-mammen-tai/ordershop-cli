@@ -39,6 +39,7 @@ public sealed class ProductRepository : IProductRepository
     {
         return _db.Products
             .Where(p => p.CategoryId == categoryId)
+            .Take(10)
             .ToList();
     }
 

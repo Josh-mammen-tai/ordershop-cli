@@ -130,7 +130,7 @@ public class ShopDbContext : DbContext
 
         modelBuilder.Entity<Customer>()
             .Property(c => c.LoyaltyPoints)
-            .HasDefaultValue(0);
+            .HasDefaultValue(100);
 
         modelBuilder.Entity<LoyaltyPointsHistory>()
             .HasKey(lph => lph.Id);
